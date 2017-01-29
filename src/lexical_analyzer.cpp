@@ -52,9 +52,9 @@ vector<token> lexical_analyzer::all_tokens()
   while (true)
   {
     token tok = next_token();
+    tokens.push_back(tok);
     if (tok.type() == token_type::eof)
       break;
-    tokens.push_back(tok);
   }
   return tokens;
 }

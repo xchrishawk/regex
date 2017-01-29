@@ -1,0 +1,21 @@
+REGULAR EXPRESSION GRAMMAR
+
+regex:
+- expr
+- expr '|' regex
+
+expr:
+- subexpr
+- subexpr expr
+
+subexpr:
+- atom
+- atom '?'
+- atom '*'
+- atom '+'
+
+atom:
+- literal
+- '(' regex ')'
+
+literal

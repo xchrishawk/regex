@@ -100,7 +100,7 @@ TEST_F(LexicalAnalyzerTests, ExtractsAllTokens)
   lexical_analyzer lex(INPUT);
   vector<token> tokens = lex.all_tokens();
 
-  ASSERT_EQ(tokens.size(), 4);
+  ASSERT_EQ(tokens.size(), 5);
 
   EXPECT_EQ(tokens[0].type(), token_type::close_bracket);
   EXPECT_EQ(tokens[0].begin(), INPUT.cbegin());
@@ -117,4 +117,6 @@ TEST_F(LexicalAnalyzerTests, ExtractsAllTokens)
   EXPECT_EQ(tokens[3].type(), token_type::kleene_operator);
   EXPECT_EQ(tokens[3].begin(), INPUT.cbegin() + 3);
   EXPECT_EQ(tokens[3].end(), INPUT.cend());
+
+  EXPECT_EQ(tokens[4].type(), token_type::eof);
 }
