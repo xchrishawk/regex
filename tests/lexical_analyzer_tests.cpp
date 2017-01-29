@@ -7,6 +7,7 @@
 /* -- Includes -- */
 
 #include <string>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include "lexical_analyzer.hpp"
@@ -90,4 +91,30 @@ TEST_F(LexicalAnalyzerTests, ExtractsKleeneOperatorToken)
 TEST_F(LexicalAnalyzerTests, ExtractsRepeatOperatorToken)
 {
   expect_single_token("+", token_type::repeat_operator);
+}
+
+/** Verify that the `regex::lexical_analyzer` class extracts a vector of all tokens. */
+TEST_F(LexicalAnalyzerTests, ExtractsAllTokens)
+{
+  static const string INPUT = ")(+*";
+  lexical_analyzer lex(INPUT);
+  vector<token> tokens = lex.all_tokens();
+
+  ASSERT_EQ(tokens.size(), 4);
+
+  EXPECT_EQ(tokens[0].type(), token_type::close_bracket);
+  EXPECT_EQ(tokens[0].begin(), INPUT.cbegin());
+  EXPECT_EQ(tokens[0].end(), INPUT.cbegin() + 1);
+
+  EXPECT_EQ(tokens[1].type(), token_type::open_bracket);
+  EXPECT_EQ(tokens[1].begin(), INPUT.cbegin() + 1);
+  EXPECT_EQ(tokens[1].end(), INPUT.cbegin() + 2);
+
+  EXPECT_EQ(tokens[2].type(), token_type::repeat_operator);
+  EXPECT_EQ(tokens[2].begin(), INPUT.cbegin() + 2);
+  EXPECT_EQ(tokens[2].end(), INPUT.cbegin() + 3);
+
+  EXPECT_EQ(tokens[3].type(), token_type::kleene_operator);
+  EXPECT_EQ(tokens[3].begin(), INPUT.cbegin() + 3);
+  EXPECT_EQ(tokens[3].end(), INPUT.cend());
 }

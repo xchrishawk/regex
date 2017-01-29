@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "token.hpp"
 
@@ -38,10 +39,13 @@ namespace regex
 
   public:
 
-    /** Extracts the next token from the input stream. */
+    /** Extracts all tokens from the input string and return them as a vector. */
+    std::vector<regex::token> all_tokens();
+
+    /** Extracts the next token from the input string. */
     regex::token next_token();
 
-    /** Peeks at the next token without removing it from the input stream. */
+    /** Peeks at the next token without removing it from the input string. */
     regex::token peek_token();
 
     /* -- Implementation -- */

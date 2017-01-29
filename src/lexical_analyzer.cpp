@@ -6,7 +6,9 @@
 
 /* -- Includes -- */
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "lexical_analyzer.hpp"
 #include "token.hpp"
@@ -43,6 +45,19 @@ lexical_analyzer::lexical_analyzer(const std::string& input)
 }
 
 lexical_analyzer::~lexical_analyzer() = default;
+
+vector<token> lexical_analyzer::all_tokens()
+{
+  vector<token> tokens;
+  while (true)
+  {
+    token tok = next_token();
+    if (tok.type() == token_type::eof)
+      break;
+    tokens.push_back(tok);
+  }
+  return tokens;
+}
 
 token lexical_analyzer::next_token()
 {
