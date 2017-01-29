@@ -31,7 +31,9 @@ find_package(GTest)
 
 # Build main executable
 add_executable(${MAIN_TARGET}
-  ${SOURCE_DIR}/main.cpp)
+  ${SOURCE_DIR}/lexical_analyzer.cpp
+  ${SOURCE_DIR}/main.cpp
+  ${SOURCE_DIR}/parser.cpp)
 target_include_directories(${MAIN_TARGET}
   PRIVATE ${SOURCE_DIR})
 
@@ -48,7 +50,10 @@ if (${GTEST_FOUND})
 
   # Builds tests executable
   add_executable(${TESTS_TARGET} EXCLUDE_FROM_ALL
-    ${TESTS_DIR}/main.cpp)
+    ${TESTS_DIR}/main.cpp
+    ${TESTS_DIR}/lexical_analyzer_tests.cpp
+    ${SOURCE_DIR}/lexical_analyzer.cpp
+    ${SOURCE_DIR}/parser.cpp)
   target_include_directories(${TESTS_TARGET}
     PRIVATE ${SOURCE_DIR}
     PRIVATE ${TESTS_DIR}
