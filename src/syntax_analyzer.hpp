@@ -23,7 +23,7 @@ namespace regex
   /**
    * Class representing an exception thrown for a syntax error.
    */
-  class syntax_error : std::runtime_error
+  class syntax_error : public std::runtime_error
   {
   public:
 

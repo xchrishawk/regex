@@ -6,6 +6,7 @@
 
 /* -- Includes -- */
 
+#include <exception>
 #include <iostream>
 #include <string>
 
@@ -22,12 +23,23 @@ using namespace regex;
 
 int main(int argc, char** argv)
 {
-  static const string INPUT = "(chris|hannah)";
-  lexical_analyzer lex(INPUT);
-  syntax_analyzer parse(lex.all_tokens());
+  try
+  {
+    static const string INPUT = "(a(b(c))))";
 
-  auto regex = parse.parse_regex();
-  print_syntax_tree(regex);
+    cout << INPUT << endl;
 
-  return 0;
+    lexical_analyzer lex(INPUT);
+    syntax_analyzer parse(lex.all_tokens());
+
+    auto regex = parse.parse_regex();
+    print_syntax_tree(regex);
+
+    return 0;
+  }
+  catch (const exception& ex)
+  {
+    cerr << ex.what() << endl;
+    return 1;
+  }
 }

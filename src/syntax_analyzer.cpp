@@ -108,13 +108,13 @@ struct syntax_analyzer::implementation
       it++;
       auto subexpr = parse_regex();
       if (it->type() != token_type::close_bracket)
-        throw_unexpected_token_error("close bracket");
+        throw_syntax_error(it->position(), "Expected close bracket.");
       it++;
       return subexpr;
     }
 
     default:
-      throw_unexpected_token_error("atom");
+      throw_syntax_error(it->position(), "Expected atom.");
     }
   }
 
@@ -131,15 +131,15 @@ struct syntax_analyzer::implementation
     }
 
     default:
-      throw_unexpected_token_error("literal");
+      throw_syntax_error(it->position(), "Expected literal character.");
     }
   }
 
   /** Throws a syntax error. */
-  [[noreturn]] void throw_unexpected_token_error(const std::string& expected)
+  [[noreturn]] static void throw_syntax_error(size_t position, const string& error_message)
   {
     ostringstream message;
-    message << "Syntax error! Expected " << expected << " at position " << it->position() << ".";
+    message << "Syntax error at position " << position << ". " << error_message;
     throw syntax_error(message.str());
   }
 
@@ -158,5 +158,8 @@ syntax_analyzer::~syntax_analyzer() = default;
 
 unique_ptr<const syntax_node> syntax_analyzer::parse_regex()
 {
-  return impl->parse_regex();
+  auto regex = impl->parse_regex();
+  if (impl->it->type() != token_type::eof)
+    implementation::throw_syntax_error(impl->it->position(), "Unparseable tokens at end of string.");
+  return regex;
 }
