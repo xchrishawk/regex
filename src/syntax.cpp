@@ -24,73 +24,47 @@ namespace
 {
 
   /** Recursively prints a syntax tree. */
-  void recursive_print_syntax_tree(const std::unique_ptr<regex::syntax_node>& root, int indentation)
+  void recursive_print_syntax_tree(const unique_ptr<const syntax_node>& root, int indentation)
   {
     for (int idx = 0; idx < indentation; idx++)
       cout << "  ";
+
+    auto print_internal = [indentation] (auto node) {
+      assert(node != nullptr);
+      cout << syntax_node_type_string(node->type()) << endl;
+      for (const auto& child : node->children())
+        recursive_print_syntax_tree(child, indentation + 1);
+    };
 
     switch (root->type())
     {
     case syntax_node_type::literal:
     {
-      syntax_literal_node* literal_node = dynamic_cast<syntax_literal_node*>(root.get());
+      auto literal_node = dynamic_cast<const syntax_literal_node*>(root.get());
       assert(literal_node != nullptr);
       cout << "Literal: " << literal_node->character() << endl;
       break;
     }
 
     case syntax_node_type::concatenation:
-    {
-      syntax_concatenation_node* concat_node = dynamic_cast<syntax_concatenation_node*>(root.get());
-      assert(concat_node != nullptr);
-      cout << "Concatenation" << endl;
-      recursive_print_syntax_tree(concat_node->sub_left(), indentation + 1);
-      recursive_print_syntax_tree(concat_node->sub_right(), indentation + 1);
+      print_internal(dynamic_cast<const syntax_concatenation_node*>(root.get()));
       break;
-    }
 
     case syntax_node_type::alternation:
-    {
-      syntax_alternation_node* altern_node = dynamic_cast<syntax_alternation_node*>(root.get());
-      assert(altern_node != nullptr);
-      cout << "Alternation" << endl;
-      recursive_print_syntax_tree(altern_node->sub_left(), indentation + 1);
-      recursive_print_syntax_tree(altern_node->sub_right(), indentation + 1);
+      print_internal(dynamic_cast<const syntax_alternation_node*>(root.get()));
       break;
-    }
 
     case syntax_node_type::optional:
-    {
-      syntax_optional_node* optional_node = dynamic_cast<syntax_optional_node*>(root.get());
-      assert(optional_node != nullptr);
-      cout << "Optional" << endl;
-      recursive_print_syntax_tree(optional_node->sub(), indentation + 1);
+      print_internal(dynamic_cast<const syntax_optional_node*>(root.get()));
       break;
-    }
 
     case syntax_node_type::kleene:
-    {
-      syntax_kleene_node* kleene_node = dynamic_cast<syntax_kleene_node*>(root.get());
-      assert(kleene_node != nullptr);
-      cout << "Kleene" << endl;
-      recursive_print_syntax_tree(kleene_node->sub(), indentation + 1);
+      print_internal(dynamic_cast<const syntax_kleene_node*>(root.get()));
       break;
-    }
 
     case syntax_node_type::repeat:
-    {
-      syntax_repeat_node* repeat_node = dynamic_cast<syntax_repeat_node*>(root.get());
-      assert(repeat_node != nullptr);
-      cout << "Repeat" << endl;
-      recursive_print_syntax_tree(repeat_node->sub(), indentation + 1);
+      print_internal(dynamic_cast<const syntax_repeat_node*>(root.get()));
       break;
-    }
-
-    default:
-    {
-      cout << "Unknown node type" << endl;
-      break;
-    }
     }
   }
 
@@ -98,7 +72,29 @@ namespace
 
 /* -- Procedures -- */
 
-void regex::print_syntax_tree(const std::unique_ptr<regex::syntax_node>& root)
+void regex::print_syntax_tree(const unique_ptr<const syntax_node>& root)
 {
   recursive_print_syntax_tree(root, 0);
+}
+
+const string& regex::syntax_node_type_string(syntax_node_type type)
+{
+  static const string STRING_LITERAL 		= "Literal";
+  static const string STRING_CONCATENATION	= "Concatenation";
+  static const string STRING_ALTERNATION	= "Alternation";
+  static const string STRING_OPTIONAL		= "Optional";
+  static const string STRING_KLEENE		= "Kleene";
+  static const string STRING_REPEAT		= "Repeat";
+  static const string STRING_DEFAULT		= "Unknown";
+
+  switch (type)
+  {
+  case syntax_node_type::literal:		return STRING_LITERAL;
+  case syntax_node_type::concatenation:		return STRING_CONCATENATION;
+  case syntax_node_type::alternation:		return STRING_ALTERNATION;
+  case syntax_node_type::optional:		return STRING_OPTIONAL;
+  case syntax_node_type::kleene:		return STRING_KLEENE;
+  case syntax_node_type::repeat:		return STRING_REPEAT;
+  default:					return STRING_DEFAULT;
+  }
 }

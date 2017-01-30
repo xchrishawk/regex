@@ -87,7 +87,7 @@ token lexical_analyzer::peek_token()
     break;
 
   case '|':
-    type = token_type::union_operator;
+    type = token_type::alternation_operator;
     break;
 
   case '?':

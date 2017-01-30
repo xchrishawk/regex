@@ -22,7 +22,7 @@ using namespace regex;
 
 int main(int argc, char** argv)
 {
-  static const string INPUT = "chri(s|h?)annah";
+  static const string INPUT = "(chris|hannah)";
   lexical_analyzer lex(INPUT);
   parser parse(lex.all_tokens());
 

@@ -24,7 +24,7 @@ namespace regex
     character,
     open_bracket,
     close_bracket,
-    union_operator,
+    alternation_operator,
     optional_operator,
     kleene_operator,
     repeat_operator,

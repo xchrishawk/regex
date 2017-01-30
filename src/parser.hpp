@@ -40,7 +40,7 @@ namespace regex
   public:
 
     /** Parses a regular expression using this parser's token list. */
-    std::unique_ptr<regex::syntax_node> parse_regex();
+    std::unique_ptr<const regex::syntax_node> parse_regex();
 
     /* -- Implementation -- */
 

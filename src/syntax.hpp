@@ -93,18 +93,19 @@ namespace regex
   public:
 
     /** Unique pointer to a child node. */
-    using child_ptr = std::unique_ptr<const regex::syntax_node>;
+    using child_type = std::unique_ptr<const regex::syntax_node>;
 
     /** Array of children. */
-    using child_array = std::array<const child_ptr, NumChildren>;
+    using children_type = std::array<const child_type, NumChildren>;
 
     /* -- Lifecycle -- */
 
   public:
 
     /** Constructs a new `regex::syntax_internal_node` with the specified children. */
-    syntax_internal_node(child_array children)
-      : m_children(std::move(children))
+    template <typename... TArgs>
+    syntax_internal_node(TArgs&&... children)
+      : m_children { std::forward<TArgs>(children)... }
     { }
 
     /* -- Public Methods -- */
@@ -118,7 +119,7 @@ namespace regex
     }
 
     /** Returns the child nodes of this syntax node. */
-    const child_array& children() const
+    const children_type& children() const
     {
       return m_children;
     }
@@ -127,24 +128,29 @@ namespace regex
 
   private:
 
-    child_array m_children;
+    children_type m_children;
 
   };
 
   /** Class for a syntax node representing a concatenation between two subexpressions. */
-  using syntax_concatenation_node = regex::syntax_internal_node<regex::syntax_node_type::concatenation, 2>;
+  using syntax_concatenation_node =
+    regex::syntax_internal_node<regex::syntax_node_type::concatenation, 2>;
 
   /** Class for a syntax node representing a union between two subexpressions. */
-  using syntax_alternation_node = regex::syntax_internal_node<regex::syntax_node_type::alternation, 2>;
+  using syntax_alternation_node =
+    regex::syntax_internal_node<regex::syntax_node_type::alternation, 2>;
 
   /** Class representing an optional closure over a subexpression. */
-  using syntax_optional_node = regex::syntax_internal_node<regex::syntax_node_type::optional, 1>;
+  using syntax_optional_node =
+    regex::syntax_internal_node<regex::syntax_node_type::optional, 1>;
 
   /** Class representing a Kleene closure over a subexpression. */
-  using syntax_kleene_node = regex::syntax_internal_node<regex::syntax_node_type::kleene, 1>;
+  using syntax_kleene_node =
+    regex::syntax_internal_node<regex::syntax_node_type::kleene, 1>;
 
   /** Class representing a repeat closure over a subexpression. */
-  using syntax_repeat_node = regex::syntax_internal_node<regex::syntax_node_type::repeat, 1>;
+  using syntax_repeat_node =
+    regex::syntax_internal_node<regex::syntax_node_type::repeat, 1>;
 
 }
 
@@ -156,6 +162,11 @@ namespace regex
   /**
    * Prints the syntax tree rooted at the specified node.
    */
-  void print_syntax_tree(const std::unique_ptr<regex::syntax_node>& root);
+  void print_syntax_tree(const std::unique_ptr<const regex::syntax_node>& root);
+
+  /**
+   * Returns a string for the specified `regex::syntax_node_type` enum.
+   */
+  const std::string& syntax_node_type_string(regex::syntax_node_type type);
 
 }
