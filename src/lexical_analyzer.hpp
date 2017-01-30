@@ -60,7 +60,7 @@ namespace regex
      * @exception regex::lexical_error
      * Thrown if a token cannot be read from the current position.
      */
-    std::vector<regex::token> all_tokens();
+    std::vector<std::unique_ptr<const regex::token>> all_tokens();
 
     /**
      * Extracts the next token from the input string.
@@ -68,15 +68,7 @@ namespace regex
      * @exception regex::lexical_error
      * Thrown if a token cannot be read from the current position.
      */
-    regex::token next_token();
-
-    /**
-     * Peeks at the next token without removing it from the input string.
-     *
-     * @exception regex::lexical_error
-     * Thrown if a token cannot be read from the current position.
-     */
-    regex::token peek_token();
+    std::unique_ptr<const regex::token> next_token();
 
     /* -- Implementation -- */
 

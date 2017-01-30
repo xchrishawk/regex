@@ -47,71 +47,92 @@ lexical_analyzer::lexical_analyzer(const std::string& input)
 
 lexical_analyzer::~lexical_analyzer() = default;
 
-vector<token> lexical_analyzer::all_tokens()
+vector<unique_ptr<const token>> lexical_analyzer::all_tokens()
 {
-  vector<token> tokens;
+  vector<unique_ptr<const token>> tokens;
   while (true)
   {
-    token tok = next_token();
-    tokens.push_back(tok);
-    if (tok.type() == token_type::eof)
+    auto tok = next_token();
+    tokens.push_back(move(tok));
+    if (tokens.back()->type() == token_type::eof)
       break;
   }
   return tokens;
 }
 
-token lexical_analyzer::next_token()
+unique_ptr<const token> lexical_analyzer::next_token()
 {
-  auto tok = peek_token();
-  if (tok.iterators_valid())
-    impl->position = tok.end();
-  return tok;
-}
+  // skip a character
+  auto skip = [this] () -> void {
+    this->impl->position++;
+  };
 
-token lexical_analyzer::peek_token()
-{
+  // get the current character
+  auto get_character = [this] () -> char {
+    return *this->impl->position;
+  };
+
+  // get current position
+  auto get_position = [this] () -> size_t {
+    return distance(this->impl->input.cbegin(), this->impl->position);
+  };
+
   // return EOF if we're out of input
   if (impl->position == impl->input.cend())
-    return token(token_type::eof);
+    return make_unique<eof_token>(get_position());
 
-  auto search = impl->position;
-  token_type type;
-
-  switch (*search)
+  switch (*impl->position)
   {
+
   case '(':
-    type = token_type::open_bracket;
-    break;
-
-  case ')':
-    type = token_type::close_bracket;
-    break;
-
-  case '|':
-    type = token_type::alternation_operator;
-    break;
-
-  case '?':
-    type = token_type::optional_operator;
-    break;
-
-  case '*':
-    type = token_type::kleene_operator;
-    break;
-
-  case '+':
-    type = token_type::repeat_operator;
-    break;
-
-  default:
-    type = token_type::character;
-    break;
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<open_bracket_token>(position);
   }
 
-  search++;
+  case ')':
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<close_bracket_token>(position);
+  }
 
-  auto begin = impl->position;
-  auto end = search;
-  auto position = distance(impl->input.cbegin(), begin);
-  return token(type, begin, end, position);
+  case '|':
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<alternation_operator_token>(position);
+  }
+
+  case '?':
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<optional_operator_token>(position);
+  }
+
+  case '*':
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<kleene_operator_token>(position);
+  }
+
+  case '+':
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<repeat_operator_token>(position);
+  }
+
+  default:
+  {
+    auto character = get_character();
+    auto position = get_position();
+    skip();
+    return make_unique<literal_token>(character, position);
+  }
+
+  }
 }

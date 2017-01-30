@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 {
   try
   {
-    static const string INPUT = "(a(b(c))))";
+    static const string INPUT = "(abc|de?f|y+)";
 
     cout << INPUT << endl;
 

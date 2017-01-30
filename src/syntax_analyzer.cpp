@@ -30,8 +30,8 @@ struct syntax_analyzer::implementation
 
   /* -- Fields -- */
 
-  vector<token> tokens;
-  vector<token>::const_iterator it;
+  vector<unique_ptr<const token>> tokens;
+  vector<unique_ptr<const token>>::const_iterator it;
 
   /* -- Methods -- */
 
@@ -39,7 +39,7 @@ struct syntax_analyzer::implementation
   unique_ptr<const syntax_node> parse_regex()
   {
     auto expr = parse_expr();
-    switch (it->type())
+    switch (next_token_type())
     {
     case token_type::alternation_operator:
     {
@@ -57,12 +57,12 @@ struct syntax_analyzer::implementation
   unique_ptr<const syntax_node> parse_expr()
   {
     auto subexpr = parse_subexpr();
-    switch (it->type())
+    switch (next_token_type())
     {
     case token_type::open_bracket:
-    case token_type::character:
+    case token_type::literal:
     {
-      // we can only start a new concatenation on an open bracket or character
+      // we can only start a new concatenation on an open bracket or literal character
       auto expr = parse_expr();
       return make_unique<const syntax_concatenation_node>(move(subexpr), move(expr));
     }
@@ -76,18 +76,18 @@ struct syntax_analyzer::implementation
   unique_ptr<const syntax_node> parse_subexpr()
   {
     auto atom = parse_atom();
-    switch (it->type())
+    switch (next_token_type())
     {
     case token_type::optional_operator:
-      it++;
+      skip_next_token();
       return make_unique<const syntax_optional_node>(move(atom));
 
     case token_type::kleene_operator:
-      it++;
+      skip_next_token();
       return make_unique<const syntax_kleene_node>(move(atom));
 
     case token_type::repeat_operator:
-      it++;
+      skip_next_token();
       return make_unique<const syntax_repeat_node>(move(atom));
 
     default:
@@ -98,41 +98,69 @@ struct syntax_analyzer::implementation
   /** Parses an atom. */
   unique_ptr<const syntax_node> parse_atom()
   {
-    switch (it->type())
+    switch (next_token_type())
     {
-    case token_type::character:
+    case token_type::literal:
       return parse_literal();
 
     case token_type::open_bracket:
     {
-      it++;
+      skip_next_token();
       auto subexpr = parse_regex();
-      if (it->type() != token_type::close_bracket)
-        throw_syntax_error(it->position(), "Expected close bracket.");
-      it++;
+      if (next_token_type() != token_type::close_bracket)
+        throw_syntax_error(next_token_position(), "Expected close bracket.");
+      skip_next_token();
       return subexpr;
     }
 
     default:
-      throw_syntax_error(it->position(), "Expected atom.");
+      throw_syntax_error(next_token_position(), "Expected atom.");
     }
   }
 
   /** Parses a literal. */
   unique_ptr<const syntax_node> parse_literal()
   {
-    switch (it->type())
+    switch (next_token_type())
     {
-    case token_type::character:
+    case token_type::literal:
     {
-      auto node = make_unique<const syntax_literal_node>(*it->begin());
-      it++;
+      auto literal_token = next_token<class literal_token>();
+      auto node = make_unique<const syntax_literal_node>(literal_token->character());
+      skip_next_token();
       return move(node);
     }
 
     default:
-      throw_syntax_error(it->position(), "Expected literal character.");
+      throw_syntax_error(next_token_position(), "Expected literal character.");
     }
+  }
+
+  /** Skips the current token. */
+  void skip_next_token()
+  {
+    it++;
+  }
+
+  /** Returns the type of the next token. */
+  token_type next_token_type() const
+  {
+    return (*it)->type();
+  }
+
+  /** Returns the position of the next token. */
+  size_t next_token_position() const
+  {
+    return (*it)->position();
+  }
+
+  /** Gets a reference to the next token as the specified type. */
+  template <typename TToken>
+  const TToken* next_token() const
+  {
+    auto ptr = dynamic_cast<const TToken*>(it->get());
+    assert(ptr != nullptr);
+    return ptr;
   }
 
   /** Throws a syntax error. */
@@ -147,7 +175,7 @@ struct syntax_analyzer::implementation
 
 /* -- Procedures -- */
 
-syntax_analyzer::syntax_analyzer(vector<token> tokens)
+syntax_analyzer::syntax_analyzer(vector<unique_ptr<const token>> tokens)
   : impl(make_unique<implementation>())
 {
   impl->tokens = move(tokens);
@@ -159,7 +187,7 @@ syntax_analyzer::~syntax_analyzer() = default;
 unique_ptr<const syntax_node> syntax_analyzer::parse_regex()
 {
   auto regex = impl->parse_regex();
-  if (impl->it->type() != token_type::eof)
-    implementation::throw_syntax_error(impl->it->position(), "Unparseable tokens at end of string.");
+  if (impl->next_token_type() != token_type::eof)
+    implementation::throw_syntax_error(impl->next_token_position(), "Unparseable tokens at end of string.");
   return regex;
 }

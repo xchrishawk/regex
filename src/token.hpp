@@ -21,7 +21,7 @@ namespace regex
   enum class token_type
   {
     eof,
-    character,
+    literal,
     open_bracket,
     close_bracket,
     alternation_operator,
@@ -31,76 +31,129 @@ namespace regex
   };
 
   /**
-   * Class representing a token extracted from an input string.
+   * Abstract base class for tokens.
    */
-  template <typename TString>
-  class basic_token
+  class token
+  {
+
+    /* -- Public Methods -- */
+
+  public:
+
+    /** Returns the type of this token. */
+    virtual regex::token_type type() const = 0;
+
+    /** The position of this token in the input string. */
+    virtual size_t position() const = 0;
+
+  };
+
+  /**
+   * Template for classes representing a simple token.
+   */
+  template <token_type TokenType>
+  class simple_token : public token
   {
 
     /* -- Lifecycle -- */
 
   public:
 
-    /** Constructs a new `regex::token` instance with the specified type. */
-    basic_token(regex::token_type type)
-      : m_type(type),
-        m_begin(),
-        m_end(),
-        m_position(0),
-        m_iterators_valid(false)
+    /** Constructs a new `regex::simple_token` with the specified position. */
+    simple_token(size_t position)
+      : m_position(position)
     { }
 
-    /** Constructs a new `regex::token` instance with the specified values. */
-    basic_token(regex::token_type type,
-                const typename TString::const_iterator& begin,
-                const typename TString::const_iterator& end,
-                const typename TString::const_iterator::difference_type position)
-      : m_type(type),
-        m_begin(begin),
-        m_end(end),
-        m_position(position),
-        m_iterators_valid(true)
-    { }
+    /* -- Public Methods -- */
+
+  public:
 
     /** Returns the type of this token. */
-    auto type() const
+    virtual regex::token_type type() const override
     {
-      return m_type;
+      return TokenType;
     }
 
-    /** Returns an iterator to the beginning position of this token. */
-    auto begin() const
-    {
-      return m_begin;
-    }
-
-    /** Returns an iterator to the end position of this token. */
-    auto end() const
-    {
-      return m_end;
-    }
-
-    /** The position of this token in the input string. */
-    auto position() const
+    /** Returns the position of this token in the input string. */
+    virtual size_t position() const override
     {
       return m_position;
     }
 
-    /** Returns `true` if the `begin` and `end` iterators are valid. */
-    auto iterators_valid() const
-    {
-      return m_iterators_valid;
-    }
+    /* -- Implementation -- */
 
   private:
-    token_type m_type;
-    typename TString::const_iterator m_begin;
-    typename TString::const_iterator m_end;
-    typename TString::const_iterator::difference_type m_position;
-    bool m_iterators_valid;
+
+    size_t m_position;
+
   };
 
-  /** Specialization of `regex::basic_token` for `std::string`. */
-  using token = regex::basic_token<std::string>;
+  /** Token class representing an EOF token. */
+  using eof_token = simple_token<regex::token_type::eof>;
+
+  /** Token class representing an open bracket. */
+  using open_bracket_token = simple_token<regex::token_type::open_bracket>;
+
+  /** Token class representing a close bracket. */
+  using close_bracket_token = simple_token<regex::token_type::close_bracket>;
+
+  /** Token class representing an alternation operator. */
+  using alternation_operator_token = simple_token<regex::token_type::alternation_operator>;
+
+  /** Token class representing an optional closure operator. */
+  using optional_operator_token = simple_token<regex::token_type::optional_operator>;
+
+  /** Token class representing a Kleene closure operator. */
+  using kleene_operator_token = simple_token<regex::token_type::kleene_operator>;
+
+  /** Token class representing a repeat closure operator. */
+  using repeat_operator_token = simple_token<regex::token_type::repeat_operator>;
+
+  /**
+   * Token class representing a literal character.
+   */
+  class literal_token : public regex::token
+  {
+
+    /* -- Lifecycle -- */
+
+  public:
+
+    /** Constructs a new `regex::literal_token` instance. */
+    literal_token(char character, size_t position)
+      : m_character(character),
+        m_position(position)
+    { }
+
+    /* -- Public Methods -- */
+
+  public:
+
+    /** Returns the type of this token. */
+    regex::token_type type() const override
+    {
+      return regex::token_type::literal;
+    }
+
+    /** Returns the literal character this token represents. */
+    char character() const
+    {
+      return m_character;
+    }
+
+    /** Returns the position of this token. */
+    size_t position() const override
+    {
+      return m_position;
+    }
+
+    /* -- Implementation -- */
+
+  private:
+
+    char m_character;
+    size_t m_position;
+
+  };
 
 }

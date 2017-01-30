@@ -45,7 +45,7 @@ namespace regex
   public:
 
     /** Constructs a new `regex::syntax_analyzer` instance using the specified tokens. */
-    syntax_analyzer(std::vector<regex::token> tokens);
+    syntax_analyzer(std::vector<std::unique_ptr<const regex::token>> tokens);
 
     /** Destructor. */
     ~syntax_analyzer();
