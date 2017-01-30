@@ -1,5 +1,5 @@
 /**
- * @file	parser.cpp
+ * @file	syntax_analyzer.cpp
  * @author	Chris Vig (chris@invictus.so)
  * @date	2017/01/28
  */
@@ -9,12 +9,13 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "lexical_analyzer.hpp"
-#include "parser.hpp"
 #include "syntax.hpp"
+#include "syntax_analyzer.hpp"
 #include "token.hpp"
 
 /* -- Namespaces -- */
@@ -24,7 +25,7 @@ using namespace regex;
 
 /* -- Types -- */
 
-struct parser::implementation
+struct syntax_analyzer::implementation
 {
 
   /* -- Fields -- */
@@ -107,13 +108,13 @@ struct parser::implementation
       it++;
       auto subexpr = parse_regex();
       if (it->type() != token_type::close_bracket)
-        throw runtime_error("Expected close bracket!");
+        throw_unexpected_token_error("close bracket");
       it++;
       return subexpr;
     }
 
     default:
-      throw runtime_error("Expected atom!");
+      throw_unexpected_token_error("atom");
     }
   }
 
@@ -130,24 +131,32 @@ struct parser::implementation
     }
 
     default:
-      throw runtime_error("Expected literal!");
+      throw_unexpected_token_error("literal");
     }
+  }
+
+  /** Throws a syntax error. */
+  [[noreturn]] void throw_unexpected_token_error(const std::string& expected)
+  {
+    ostringstream message;
+    message << "Syntax error! Expected " << expected << " at position " << it->position() << ".";
+    throw syntax_error(message.str());
   }
 
 };
 
 /* -- Procedures -- */
 
-parser::parser(vector<token> tokens)
+syntax_analyzer::syntax_analyzer(vector<token> tokens)
   : impl(make_unique<implementation>())
 {
   impl->tokens = move(tokens);
   impl->it = impl->tokens.cbegin();
 }
 
-parser::~parser() = default;
+syntax_analyzer::~syntax_analyzer() = default;
 
-unique_ptr<const syntax_node> parser::parse_regex()
+unique_ptr<const syntax_node> syntax_analyzer::parse_regex()
 {
   return impl->parse_regex();
 }

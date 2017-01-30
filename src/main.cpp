@@ -10,8 +10,8 @@
 #include <string>
 
 #include "lexical_analyzer.hpp"
-#include "parser.hpp"
 #include "syntax.hpp"
+#include "syntax_analyzer.hpp"
 
 /* -- Namespaces -- */
 
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 {
   static const string INPUT = "(chris|hannah)";
   lexical_analyzer lex(INPUT);
-  parser parse(lex.all_tokens());
+  syntax_analyzer parse(lex.all_tokens());
 
   auto regex = parse.parse_regex();
   print_syntax_tree(regex);

@@ -33,8 +33,8 @@ find_package(GTest)
 add_executable(${MAIN_TARGET}
   ${SOURCE_DIR}/lexical_analyzer.cpp
   ${SOURCE_DIR}/main.cpp
-  ${SOURCE_DIR}/parser.cpp
-  ${SOURCE_DIR}/syntax.cpp)
+  ${SOURCE_DIR}/syntax.cpp
+  ${SOURCE_DIR}/syntax_analyzer.cpp)
 target_include_directories(${MAIN_TARGET}
   PRIVATE ${SOURCE_DIR})
 
@@ -54,7 +54,8 @@ if (${GTEST_FOUND})
     ${TESTS_DIR}/main.cpp
     ${TESTS_DIR}/lexical_analyzer_tests.cpp
     ${SOURCE_DIR}/lexical_analyzer.cpp
-    ${SOURCE_DIR}/parser.cpp)
+    ${SOURCE_DIR}/syntax.cpp
+    ${SOURCE_DIR}/syntax_analyzer.cpp)
   target_include_directories(${TESTS_TARGET}
     PRIVATE ${SOURCE_DIR}
     PRIVATE ${TESTS_DIR}

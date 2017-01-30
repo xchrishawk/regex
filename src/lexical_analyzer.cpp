@@ -6,6 +6,7 @@
 
 /* -- Includes -- */
 
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -108,5 +109,9 @@ token lexical_analyzer::peek_token()
   }
 
   search++;
-  return token(type, impl->position, search);
+
+  auto begin = impl->position;
+  auto end = search;
+  auto position = distance(impl->input.cbegin(), begin);
+  return token(type, begin, end, position);
 }
