@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 {
   try
   {
-    static const string INPUT = ".....";
+    static const string INPUT = "\\?\\\\\\*\\++a?\\?";
 
     cout << "Regex: " << INPUT << endl;
 

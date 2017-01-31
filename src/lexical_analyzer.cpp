@@ -8,6 +8,7 @@
 
 #include <iterator>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -35,6 +36,16 @@ struct lexical_analyzer::implementation
 
   const std::string& input;
   std::string::const_iterator position;
+
+  /* -- Methods -- */
+
+  /** Throws a syntax error. */
+  [[noreturn]] static void throw_syntax_error(size_t position, const string& error_message)
+  {
+    ostringstream message;
+    message << "Lexical error at position " << position << ". " << error_message;
+    throw lexical_error(message.str());
+  }
 
 };
 
@@ -131,6 +142,35 @@ unique_ptr<const token> lexical_analyzer::next_token()
     auto position = get_position();
     skip();
     return make_unique<repeat_operator_token>(position);
+  }
+
+  case '\\':
+  {
+    auto next = impl->position + 1;
+    if (next == impl->input.cend())
+      implementation::throw_syntax_error(get_position(), "Escape character at end of string.");
+
+    switch (*next)
+    {
+    case '.':
+    case '(':
+    case ')':
+    case '|':
+    case '?':
+    case '*':
+    case '+':
+    case '\\':
+    {
+      skip();
+      auto character = get_character();
+      auto position = get_position();
+      skip();
+      return make_unique<literal_token>(character, position);
+    }
+
+    default:
+      implementation::throw_syntax_error(get_position(), "Unrecognized escape sequence.");
+    }
   }
 
   default:
