@@ -84,6 +84,13 @@ unique_ptr<const token> lexical_analyzer::next_token()
   switch (*impl->position)
   {
 
+  case '.':
+  {
+    auto position = get_position();
+    skip();
+    return make_unique<wildcard_token>(position);
+  }
+
   case '(':
   {
     auto position = get_position();

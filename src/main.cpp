@@ -25,9 +25,9 @@ int main(int argc, char** argv)
 {
   try
   {
-    static const string INPUT = "(abc|de?f|y+)";
+    static const string INPUT = ".....";
 
-    cout << INPUT << endl;
+    cout << "Regex: " << INPUT << endl;
 
     lexical_analyzer lex(INPUT);
     syntax_analyzer parse(lex.all_tokens());

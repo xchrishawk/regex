@@ -46,6 +46,10 @@ namespace
       break;
     }
 
+    case syntax_node_type::wildcard:
+      cout << "Wildcard" << endl;
+      break;
+
     case syntax_node_type::concatenation:
       print_internal(dynamic_cast<const syntax_concatenation_node*>(root.get()));
       break;
@@ -80,6 +84,7 @@ void regex::print_syntax_tree(const unique_ptr<const syntax_node>& root)
 const string& regex::syntax_node_type_string(syntax_node_type type)
 {
   static const string STRING_LITERAL 		= "Literal";
+  static const string STRING_WILDCARD		= "Wildcard";
   static const string STRING_CONCATENATION	= "Concatenation";
   static const string STRING_ALTERNATION	= "Alternation";
   static const string STRING_OPTIONAL		= "Optional";
@@ -90,6 +95,7 @@ const string& regex::syntax_node_type_string(syntax_node_type type)
   switch (type)
   {
   case syntax_node_type::literal:		return STRING_LITERAL;
+  case syntax_node_type::wildcard:		return STRING_WILDCARD;
   case syntax_node_type::concatenation:		return STRING_CONCATENATION;
   case syntax_node_type::alternation:		return STRING_ALTERNATION;
   case syntax_node_type::optional:		return STRING_OPTIONAL;

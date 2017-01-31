@@ -16,6 +16,9 @@ subexpr:
 
 atom:
 - literal
+- wildcard
 - '(' regex ')'
 
 literal
+
+wildcard

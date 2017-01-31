@@ -22,6 +22,7 @@ namespace regex
   {
     eof,
     literal,
+    wildcard,
     open_bracket,
     close_bracket,
     alternation_operator,
@@ -90,6 +91,9 @@ namespace regex
 
   /** Token class representing an EOF token. */
   using eof_token = simple_token<regex::token_type::eof>;
+
+  /** Token class representing a wildcard token. */
+  using wildcard_token = simple_token<regex::token_type::wildcard>;
 
   /** Token class representing an open bracket. */
   using open_bracket_token = simple_token<regex::token_type::open_bracket>;

@@ -16,18 +16,23 @@
 namespace regex
 {
 
+  /* -- Enumerations -- */
+
   /**
    * Enumeration of types of syntax nodes.
    */
   enum class syntax_node_type
   {
     literal,
+    wildcard,
     concatenation,
     alternation,
     optional,
     kleene,
     repeat,
   };
+
+  /* -- Base Type -- */
 
   /**
    * Abstract base class for types representing a node in a syntax tree.
@@ -44,10 +49,27 @@ namespace regex
 
   };
 
+  /* -- Terminal Nodes -- */
+
+  /**
+   * Abstract base class for types representing a terminal node (leaf) in a syntax tree.
+   */
+  class syntax_terminal_node : public regex::syntax_node
+  {
+
+    /* -- Public Methods -- */
+
+  public:
+
+    /** Returns `true` if this node matches the specified character. */
+    virtual bool matches_character(char ch) const = 0;
+
+  };
+
   /**
    * Class representing a literal character note in a syntax tree.
    */
-  class syntax_literal_node : public syntax_node
+  class syntax_literal_node : public regex::syntax_terminal_node
   {
 
     /* -- Lifecycle -- */
@@ -69,6 +91,12 @@ namespace regex
       return syntax_node_type::literal;
     }
 
+    /** Returns `true` if this node matches the specified character. */
+    virtual bool matches_character(char ch) const override
+    {
+      return (ch == m_character);
+    }
+
     /** Returns the character that this literal represents. */
     char character() const
     {
@@ -82,10 +110,36 @@ namespace regex
   };
 
   /**
+   * Class representing a wildcard character node in a syntax tree.
+   */
+  class syntax_wildcard_node : public regex::syntax_terminal_node
+  {
+
+    /* -- Public Methods -- */
+
+  public:
+
+    /** Returns the type of this syntax node. */
+    virtual regex::syntax_node_type type() const override
+    {
+      return syntax_node_type::wildcard;
+    }
+
+    /** Returns `true` if this node matches the specified character. */
+    virtual bool matches_character(char ch) const override
+    {
+      return true;
+    }
+
+  };
+
+  /* -- Internal Nodes -- */
+
+  /**
    * Template for classes representing an internal syntax node.
    */
   template <regex::syntax_node_type NodeType, size_t NumChildren>
-  class syntax_internal_node : public syntax_node
+  class syntax_internal_node : public regex::syntax_node
   {
 
     /* -- Types -- */

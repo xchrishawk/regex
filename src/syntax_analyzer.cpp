@@ -61,8 +61,9 @@ struct syntax_analyzer::implementation
     {
     case token_type::open_bracket:
     case token_type::literal:
+    case token_type::wildcard:
     {
-      // we can only start a new concatenation on an open bracket or literal character
+      // we can only start a new concatenation on an open bracket, literal, or wildcard
       auto expr = parse_expr();
       return make_unique<const syntax_concatenation_node>(move(subexpr), move(expr));
     }
@@ -103,6 +104,9 @@ struct syntax_analyzer::implementation
     case token_type::literal:
       return parse_literal();
 
+    case token_type::wildcard:
+      return parse_wildcard();
+
     case token_type::open_bracket:
     {
       skip_next_token();
@@ -133,6 +137,23 @@ struct syntax_analyzer::implementation
 
     default:
       throw_syntax_error(next_token_position(), "Expected literal character.");
+    }
+  }
+
+  /** Parses a wildcard. */
+  unique_ptr<const syntax_node> parse_wildcard()
+  {
+    switch (next_token_type())
+    {
+    case token_type::wildcard:
+    {
+      auto node = make_unique<const syntax_wildcard_node>();
+      skip_next_token();
+      return move(node);
+    }
+
+    default:
+      throw_syntax_error(next_token_position(), "Expected wildcard.");
     }
   }
 
