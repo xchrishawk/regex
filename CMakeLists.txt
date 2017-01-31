@@ -17,10 +17,28 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-# Toolchain configuration
+# Toolchain common configuration
 set(CMAKE_CXX_FLAGS "-std=gnu++14 -Wall -Wpedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-Werror -O2 -s")
+set(CMAKE_CXX_FLAGS_RELEASE "-Werror -O2")
+
+# Toolchain-specific configuration
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+
+  # Silence unneeded warning
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces -Wmissing-field-initializers")
+
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
+  # GCC does not warn about -s flag
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+
+else()
+
+  # Only support GCC and Clang currently
+  message(FATAL_ERROR "Unsupported C++ compiler: ${CMAKE_CXX_COMPILER_ID}")
+
+endif()
 
 # -- Third Party Libraries --
 
