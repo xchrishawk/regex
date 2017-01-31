@@ -23,6 +23,7 @@ namespace regex
     eof,
     literal,
     wildcard,
+    quantifier,
     open_bracket,
     close_bracket,
     alternation_operator,
@@ -157,6 +158,59 @@ namespace regex
 
     char m_character;
     size_t m_position;
+
+  };
+
+  /**
+   * Token class representing a quantifier.
+   */
+  class quantifier_token : public regex::token
+  {
+
+    /* -- Lifecycle -- */
+
+  public:
+
+    /** Constructs a new instance matching the specified quantity only. */
+    quantifier_token(size_t count)
+      : m_min_count(count),
+        m_max_count(count)
+    { }
+
+    /** Constructs a new instance matching quantities between `min_count` and `max_count`, inclusive. */
+    quantifier_token(size_t min_count, size_t max_count)
+      : m_min_count(min_count),
+        m_max_count(max_count)
+    { }
+
+    /* -- Public Methods -- */
+
+  public:
+
+    /** Returns the type of this token. */
+    regex::token_type type() const
+    {
+      return regex::token_type::quantifier;
+    }
+
+    /** The minimum number of repetitions for this token. */
+    size_t min_count() const
+    {
+      return m_min_count;
+    }
+
+    /** The maximum number of repetitions for this token. */
+    size_t max_count() const
+    {
+      return m_max_count;
+    }
+
+    /* -- Implementation -- */
+
+  private:
+
+    size_t m_min_count;
+    size_t m_max_count;
 
   };
 
